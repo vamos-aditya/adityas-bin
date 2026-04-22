@@ -55,7 +55,7 @@ body::before {
   color: white;
 }
 
-/* 🎵 MUSIC BUTTON (TOP RIGHT) */
+/* 🎵 MUSIC BUTTON */
 #musicBtn {
   position: fixed;
   top: 15px;
@@ -75,7 +75,7 @@ body::before {
 #ytBtn {
   position: fixed;
   top: 15px;
-  left: 15px;   /* 👈 moved here */
+  left: 15px;
   z-index: 999;
   background: #ff0000;
   border: none;
@@ -88,10 +88,6 @@ body::before {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-#ytBtn:hover {
-  background: #cc0000;
 }
 
 /* file button */
@@ -150,7 +146,7 @@ button.upload {
   text-shadow: 0 0 10px #ff1744;
 }
 
-/* 🔴 GLOW EFFECT */
+/* 🔴 GLOW */
 .glow {
   animation: glowPulse 1.5s ease-in-out 2;
   box-shadow: 0 0 20px #ff1744, 0 0 40px #ff1744;
@@ -190,7 +186,6 @@ button.upload {
 <!-- 🎵 BUTTONS -->
 <button id="musicBtn">🎵 Resume Music</button>
 
-<!-- ▶ YOUTUBE (NOW TOP LEFT) -->
 <button id="ytBtn">
   <svg height="18" width="18" viewBox="0 0 24 24" fill="white">
     <path d="M10 15l5.19-3L10 9v6zm11-3c0 5-1 6-8 6s-8-1-8-6 1-6 8-6 8 1 8 6z"/>
@@ -221,6 +216,7 @@ button.upload {
 </div>
 
 <script>
+/* ▶ YOUTUBE */
 const ytBtn = document.getElementById("ytBtn");
 const ytLink = "https://www.youtube.com/watch?v=teERz_qPtzY";
 
@@ -250,7 +246,7 @@ musicBtn.addEventListener("click", () => {
   }
 });
 
-/* UPLOAD */
+/* UPLOAD FIXED (IMPORTANT CHANGE HERE) */
 const form = document.getElementById("uploadForm");
 const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
@@ -290,7 +286,8 @@ form.addEventListener("submit", function(e) {
     setTimeout(() => box.classList.remove("glow"), 3000);
   };
 
-  xhr.open("POST", "http://localhost:3000/upload");
+  /* ✅ FIX: works on Render + local */
+  xhr.open("POST", "/upload");
   xhr.send(formData);
 });
 </script>
