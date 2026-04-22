@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aditya's Bin</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Alegreya', serif;
+  background: url("./bg.jpg") no-repeat center/cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  top: 0;
+  left: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  background: rgba(20,20,30,0.7);
+  backdrop-filter: blur(12px);
+  padding: 35px;
+  border-radius: 20px;
+  width: 380px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+h2 {
+  margin-bottom: 25px;
+}
+
+/* custom file button */
+.file-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #000;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Alegreya', serif;
+  margin-bottom: 10px;
+}
+
+.file-label:hover {
+  background: #ddd;
+}
+
+.file-label input {
+  display: none;
+}
+
+#fileName {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+/* button */
+button {
+  background: #4CAF50;
+  border: none;
+  padding: 12px 25px;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: 'Alegreya', serif;
+}
+
+button:hover {
+  background: #45a049;
+}
+
+/* progress */
+.progress-container {
+  width: 100%;
+  background: #333;
+  border-radius: 10px;
+  margin-top: 15px;
+  display: none;
+}
+
+.progress-bar {
+  height: 10px;
+  width: 0%;
+  background: #00ffcc;
+  border-radius: 10px;
+}
+
+#link {
+  margin-top: 20px;
+  word-break: break-all;
+}
+
+a {
+  color: #00ffcc;
+  text-decoration: none;
+}
+
+/* confetti */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: 0;
+  animation: fall 3s linear;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🗂️ Aditya's Bin</h2>
+
+  <form id="uploadForm">
+    
+    <!-- custom file input -->
+    <label class="file-label">
+      Choose File
+      <input type="file" name="file" id="fileInput" required />
+    </label>
+
+    <p id="fileName">No file chosen</p>
+
+    <button type="submit">Upload</button>
+  </form>
+
+  <!-- progress -->
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <p id="link"></p>
+</div>
+
+<script>
+const form = document.getElementById("uploadForm");
+const progressBar = document.getElementById("progressBar");
+const progressContainer = document.getElementById("progressContainer");
+const fileInput = document.getElementById("fileInput");
+const fileName = document.getElementById("fileName");
+
+// show selected file name
+fileInput.addEventListener("change", () => {
+  fileName.textContent = fileInput.files[0]
+    ? fileInput.files[0].name
+    : "No file chosen";
+});
+
+// upload logic
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(form);
+  const xhr = new XMLHttpRequest();
+
+  progressContainer.style.display = "block";
+
+  xhr.upload.addEventListener("progress", (e) => {
+    if (e.lengthComputable) {
+      let percent = (e.loaded / e.total) * 100;
+      progressBar.style.width = percent + "%";
+    }
+  });
+
+  xhr.onload = function() {
+    const data = JSON.parse(xhr.responseText);
+
+    document.getElementById("link").innerHTML =
+      `<p>🎉 Uploaded!</p>
+       <a href="${data.link}" target="_blank">${data.link}</a>`;
+
+    launchConfetti();
+  };
+
+  xhr.open("POST", "http://localhost:3000/upload");
+  xhr.send(formData);
+});
+
+// confetti
+function launchConfetti() {
+  for (let i = 0; i < 50; i++) {
+    let div = document.createElement("div");
+    div.classList.add("confetti");
+
+    div.style.left = Math.random() * 100 + "vw";
+    div.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
+
+    document.body.appendChild(div);
+
+    setTimeout(() => div.remove(), 3000);
+  }
+}
+</script>
+
+</body>
+</html>
