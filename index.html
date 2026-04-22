@@ -55,24 +55,43 @@ body::before {
   color: white;
 }
 
-/* 🎵 MUSIC BUTTON TOP RIGHT */
+/* 🎵 MUSIC BUTTON (TOP RIGHT) */
 #musicBtn {
   position: fixed;
   top: 15px;
   right: 15px;
   z-index: 999;
-  background: #ff1744;
+  background: #38bdf8;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 15px #38bdf8;
+  font-family: 'Alegreya', serif;
+}
+
+/* ▶ YOUTUBE BUTTON (TOP LEFT) */
+#ytBtn {
+  position: fixed;
+  top: 15px;
+  left: 15px;   /* 👈 moved here */
+  z-index: 999;
+  background: #ff0000;
   border: none;
   padding: 10px 14px;
   border-radius: 10px;
   color: white;
   cursor: pointer;
   font-family: 'Alegreya', serif;
-  box-shadow: 0 0 15px #ff1744;
+  box-shadow: 0 0 15px #ff0000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-#musicBtn:hover {
-  background: #e6003a;
+#ytBtn:hover {
+  background: #cc0000;
 }
 
 /* file button */
@@ -97,7 +116,7 @@ body::before {
 }
 
 /* upload button */
-button {
+button.upload {
   background: #4CAF50;
   border: none;
   padding: 10px 18px;
@@ -131,7 +150,7 @@ button {
   text-shadow: 0 0 10px #ff1744;
 }
 
-/* 🔴 GLOW */
+/* 🔴 GLOW EFFECT */
 .glow {
   animation: glowPulse 1.5s ease-in-out 2;
   box-shadow: 0 0 20px #ff1744, 0 0 40px #ff1744;
@@ -168,8 +187,16 @@ button {
   <source src="music.mp3" type="audio/mp3">
 </audio>
 
-<!-- 🎵 BUTTON TOP RIGHT -->
-<button id="musicBtn">🔇 Mute Music</button>
+<!-- 🎵 BUTTONS -->
+<button id="musicBtn">🎵 Resume Music</button>
+
+<!-- ▶ YOUTUBE (NOW TOP LEFT) -->
+<button id="ytBtn">
+  <svg height="18" width="18" viewBox="0 0 24 24" fill="white">
+    <path d="M10 15l5.19-3L10 9v6zm11-3c0 5-1 6-8 6s-8-1-8-6 1-6 8-6 8 1 8 6z"/>
+  </svg>
+  YouTube
+</button>
 
 <div class="container" id="mainBox">
   <h2>🗂️ Aditya's Bin</h2>
@@ -183,7 +210,7 @@ button {
 
     <p id="fileName">No file chosen</p>
 
-    <button type="submit">Upload</button>
+    <button class="upload" type="submit">Upload</button>
   </form>
 
   <div class="progress-container" id="progressContainer">
@@ -194,37 +221,36 @@ button {
 </div>
 
 <script>
-const music = document.getElementById("bgMusic");
-const btn = document.getElementById("musicBtn");
+const ytBtn = document.getElementById("ytBtn");
+const ytLink = "https://www.youtube.com/watch?v=teERz_qPtzY";
 
-let isPlaying = false;
-
-/* 🎵 AUTOPLAY ATTEMPT */
-window.addEventListener("load", () => {
-  music.play().then(() => {
-    isPlaying = true;
-    btn.innerText = "🔇 Mute Music";
-  }).catch(() => {
-    // autoplay blocked → wait for user interaction
-    isPlaying = false;
-    btn.innerText = "🎵 Play Music";
-  });
+ytBtn.addEventListener("click", () => {
+  window.open(ytLink, "_blank");
 });
 
-/* 🎵 TOGGLE */
-btn.addEventListener("click", () => {
-  if (!isPlaying) {
+/* 🎵 MUSIC */
+const music = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+
+music.muted = true;
+music.play().catch(() => {});
+
+let isMuted = true;
+
+musicBtn.addEventListener("click", () => {
+  if (isMuted) {
+    music.muted = false;
     music.play();
-    btn.innerText = "🔇 Mute Music";
-    isPlaying = true;
+    musicBtn.innerText = "🔇 Mute Music";
+    isMuted = false;
   } else {
-    music.pause();
-    btn.innerText = "🎵 Play Music";
-    isPlaying = false;
+    music.muted = true;
+    musicBtn.innerText = "🎵 Resume Music";
+    isMuted = true;
   }
 });
 
-/* upload logic */
+/* UPLOAD */
 const form = document.getElementById("uploadForm");
 const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
