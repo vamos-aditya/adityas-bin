@@ -27,6 +27,7 @@ body {
   height: 100%;
   object-fit: cover;
   z-index: -2;
+  pointer-events: none;
 }
 
 /* 🌑 OVERLAY */
@@ -138,7 +139,7 @@ button.upload {
   border-radius: 10px;
 }
 
-/* uploaded message */
+/* uploaded */
 .uploaded-msg {
   color: #ff1744;
   font-size: 18px;
@@ -156,28 +157,10 @@ button.upload {
   font-family: 'Alegreya', serif;
   font-weight: bold;
   box-shadow: 0 0 15px #00ffcc;
-  transition: 0.3s;
   margin-top: 10px;
 }
 
-#downloadBtn:hover {
-  background: #00ddb3;
-  box-shadow: 0 0 25px #00ffcc;
-}
-
-/* glow */
-.glow {
-  animation: glowPulse 1.5s ease-in-out 2;
-  box-shadow: 0 0 20px #ff1744, 0 0 40px #ff1744;
-}
-
-@keyframes glowPulse {
-  0% { box-shadow: 0 0 0px #ff1744; }
-  50% { box-shadow: 0 0 35px #ff1744, 0 0 70px #ff1744; }
-  100% { box-shadow: 0 0 0px #ff1744; }
-}
-
-/* mobile */
+/* 📱 MOBILE */
 @media (max-width: 768px) {
   #bgVideo {
     display: none;
@@ -192,8 +175,8 @@ button.upload {
 
 <body>
 
-<!-- 🎬 VIDEO -->
-<video autoplay muted loop id="bgVideo">
+<!-- 🎬 VIDEO (FIXED FOR ANDROID) -->
+<video autoplay muted loop playsinline id="bgVideo">
   <source src="bg.mp4" type="video/mp4">
 </video>
 
@@ -216,7 +199,6 @@ button.upload {
   <h2>🗂️ Aditya's Bin</h2>
 
   <form id="uploadForm">
-    
     <label class="file-label">
       Choose File
       <input type="file" name="file" id="fileInput" required />
@@ -235,12 +217,18 @@ button.upload {
 </div>
 
 <script>
-/* youtube */
+/* FIX VIDEO AUTOPLAY ON ANDROID */
+const video = document.getElementById("bgVideo");
+video.play().catch(() => {
+  console.log("Autoplay blocked");
+});
+
+/* YOUTUBE */
 document.getElementById("ytBtn").onclick = () => {
   window.open("https://www.youtube.com/watch?v=teERz_qPtzY", "_blank");
 };
 
-/* music */
+/* MUSIC */
 const music = document.getElementById("bgMusic");
 const musicBtn = document.getElementById("musicBtn");
 
@@ -262,7 +250,7 @@ musicBtn.onclick = () => {
   }
 };
 
-/* upload */
+/* UPLOAD */
 const form = document.getElementById("uploadForm");
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
