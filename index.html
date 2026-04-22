@@ -10,24 +10,38 @@
 body {
   margin: 0;
   font-family: 'Alegreya', serif;
-  background: url("./bg.jpg") no-repeat center/cover;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
+  overflow: hidden;
 }
 
+/* 🎬 VIDEO BACKGROUND */
+#bgVideo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+/* 🌑 OVERLAY */
 body::before {
   content: "";
-  position: absolute;
+  position: fixed;
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.6);
   top: 0;
   left: 0;
+  z-index: -1;
 }
 
+/* 📦 MAIN BOX */
 .container {
   position: relative;
   z-index: 1;
@@ -38,13 +52,30 @@ body::before {
   width: 380px;
   text-align: center;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  color: white;
 }
 
-h2 {
-  margin-bottom: 25px;
+/* 🎵 MUSIC BUTTON TOP RIGHT */
+#musicBtn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 999;
+  background: #ff1744;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-family: 'Alegreya', serif;
+  box-shadow: 0 0 15px #ff1744;
 }
 
-/* custom file button */
+#musicBtn:hover {
+  background: #e6003a;
+}
+
+/* file button */
 .file-label {
   display: inline-block;
   padding: 10px 20px;
@@ -52,12 +83,7 @@ h2 {
   color: #000;
   border-radius: 8px;
   cursor: pointer;
-  font-family: 'Alegreya', serif;
   margin-bottom: 10px;
-}
-
-.file-label:hover {
-  background: #ddd;
 }
 
 .file-label input {
@@ -70,20 +96,15 @@ h2 {
   margin-bottom: 15px;
 }
 
-/* button */
+/* upload button */
 button {
   background: #4CAF50;
   border: none;
-  padding: 12px 25px;
+  padding: 10px 18px;
+  margin: 5px;
   color: white;
   border-radius: 10px;
   cursor: pointer;
-  transition: 0.3s;
-  font-family: 'Alegreya', serif;
-}
-
-button:hover {
-  background: #45a049;
 }
 
 /* progress */
@@ -102,28 +123,34 @@ button:hover {
   border-radius: 10px;
 }
 
-#link {
-  margin-top: 20px;
-  word-break: break-all;
+/* uploaded text */
+.uploaded-msg {
+  color: #ff1744;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 0 0 10px #ff1744;
 }
 
-a {
-  color: #00ffcc;
-  text-decoration: none;
+/* 🔴 GLOW */
+.glow {
+  animation: glowPulse 1.5s ease-in-out 2;
+  box-shadow: 0 0 20px #ff1744, 0 0 40px #ff1744;
 }
 
-/* confetti */
-.confetti {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  top: 0;
-  animation: fall 3s linear;
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 0px #ff1744; }
+  50% { box-shadow: 0 0 35px #ff1744, 0 0 70px #ff1744; }
+  100% { box-shadow: 0 0 0px #ff1744; }
 }
 
-@keyframes fall {
-  to {
-    transform: translateY(100vh) rotate(360deg);
+/* 📱 MOBILE */
+@media (max-width: 768px) {
+  #bgVideo {
+    display: none;
+  }
+
+  body {
+    background: url("./bg.jpg") no-repeat center/cover;
   }
 }
 </style>
@@ -131,12 +158,24 @@ a {
 
 <body>
 
-<div class="container">
+<!-- 🎬 VIDEO -->
+<video autoplay muted loop id="bgVideo">
+  <source src="bg.mp4" type="video/mp4">
+</video>
+
+<!-- 🎵 MUSIC -->
+<audio id="bgMusic" loop>
+  <source src="music.mp3" type="audio/mp3">
+</audio>
+
+<!-- 🎵 BUTTON TOP RIGHT -->
+<button id="musicBtn">🔇 Mute Music</button>
+
+<div class="container" id="mainBox">
   <h2>🗂️ Aditya's Bin</h2>
 
   <form id="uploadForm">
     
-    <!-- custom file input -->
     <label class="file-label">
       Choose File
       <input type="file" name="file" id="fileInput" required />
@@ -147,7 +186,6 @@ a {
     <button type="submit">Upload</button>
   </form>
 
-  <!-- progress -->
   <div class="progress-container" id="progressContainer">
     <div class="progress-bar" id="progressBar"></div>
   </div>
@@ -156,20 +194,50 @@ a {
 </div>
 
 <script>
+const music = document.getElementById("bgMusic");
+const btn = document.getElementById("musicBtn");
+
+let isPlaying = false;
+
+/* 🎵 AUTOPLAY ATTEMPT */
+window.addEventListener("load", () => {
+  music.play().then(() => {
+    isPlaying = true;
+    btn.innerText = "🔇 Mute Music";
+  }).catch(() => {
+    // autoplay blocked → wait for user interaction
+    isPlaying = false;
+    btn.innerText = "🎵 Play Music";
+  });
+});
+
+/* 🎵 TOGGLE */
+btn.addEventListener("click", () => {
+  if (!isPlaying) {
+    music.play();
+    btn.innerText = "🔇 Mute Music";
+    isPlaying = true;
+  } else {
+    music.pause();
+    btn.innerText = "🎵 Play Music";
+    isPlaying = false;
+  }
+});
+
+/* upload logic */
 const form = document.getElementById("uploadForm");
 const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
+const box = document.getElementById("mainBox");
 
-// show selected file name
 fileInput.addEventListener("change", () => {
   fileName.textContent = fileInput.files[0]
     ? fileInput.files[0].name
     : "No file chosen";
 });
 
-// upload logic
 form.addEventListener("submit", function(e) {
   e.preventDefault();
 
@@ -189,30 +257,16 @@ form.addEventListener("submit", function(e) {
     const data = JSON.parse(xhr.responseText);
 
     document.getElementById("link").innerHTML =
-      `<p>🎉 Uploaded!</p>
+      `<p class="uploaded-msg">🎉 Uploaded!</p>
        <a href="${data.link}" target="_blank">${data.link}</a>`;
 
-    launchConfetti();
+    box.classList.add("glow");
+    setTimeout(() => box.classList.remove("glow"), 3000);
   };
 
   xhr.open("POST", "http://localhost:3000/upload");
   xhr.send(formData);
 });
-
-// confetti
-function launchConfetti() {
-  for (let i = 0; i < 50; i++) {
-    let div = document.createElement("div");
-    div.classList.add("confetti");
-
-    div.style.left = Math.random() * 100 + "vw";
-    div.style.backgroundColor = `hsl(${Math.random()*360},100%,50%)`;
-
-    document.body.appendChild(div);
-
-    setTimeout(() => div.remove(), 3000);
-  }
-}
 </script>
 
 </body>
