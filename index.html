@@ -1,79 +1,233 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>TempShare</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f0f0f;
-            color: white;
-            display: flex;
-            height: 100vh;
-            justify-content: center;
-            align-items: center;
-        }
+<meta charset="UTF-8">
+<title>Aditya's Bin</title>
 
-        .container {
-            text-align: center;
-            padding: 30px;
-            border: 1px solid #333;
-            border-radius: 10px;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&display=swap" rel="stylesheet">
 
-        input {
-            margin: 10px 0;
-        }
+<style>
+body {
+  margin: 0;
+  font-family: 'Alegreya', serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  color: white;
+}
 
-        button {
-            padding: 10px 20px;
-            background: #2979ff;
-            border: none;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+/* VIDEO BACKGROUND */
+#bgVideo {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
 
-        a {
-            color: #00e676;
-            display: block;
-            margin-top: 15px;
-            word-break: break-all;
-        }
-    </style>
+/* DARK OVERLAY */
+body::before {
+  content: "";
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  z-index: -1;
+}
+
+/* MAIN BOX */
+.container {
+  background: rgba(20,20,30,0.78);
+  backdrop-filter: blur(14px);
+  padding: 35px;
+  border-radius: 20px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 45px rgba(0,0,0,0.65);
+}
+
+/* FILE INPUT */
+.file-label {
+  display: inline-block;
+  padding: 12px 22px;
+  background: white;
+  color: black;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.file-label input {
+  display: none;
+}
+
+#fileName {
+  margin: 10px 0;
+  color: #ccc;
+}
+
+/* BUTTON */
+button.upload {
+  background: #4CAF50;
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* PROGRESS */
+.progress-container {
+  width: 100%;
+  background: #333;
+  border-radius: 10px;
+  margin-top: 15px;
+  display: none;
+}
+
+.progress-bar {
+  height: 10px;
+  width: 0%;
+  background: #00ffcc;
+  border-radius: 10px;
+}
+
+/* LINK AREA */
+#link {
+  margin-top: 15px;
+  word-break: break-all;
+}
+
+#link a {
+  color: #38bdf8;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* INFO BUTTON */
+#infoBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: #38bdf8;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+/* INFO BOX */
+#infoBox {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 300px;
+  background: rgba(20,20,30,0.95);
+  padding: 20px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+</style>
 </head>
+
 <body>
 
+<video autoplay muted loop playsinline id="bgVideo">
+  <source src="newbg.mp4" type="video/mp4">
+</video>
+
 <div class="container">
-    <h2>TempShare</h2>
+  <h2>🗂️ Aditya's Bin</h2>
 
-    <input type="file" id="file">
-    <br>
-    <button onclick="uploadFile()">Upload</button>
+  <form id="uploadForm">
+    <label class="file-label">
+      Choose File
+      <input type="file" name="file" id="fileInput" required />
+    </label>
 
-    <a id="link"></a>
+    <p id="fileName">No file chosen</p>
+
+    <button class="upload" type="submit">Upload</button>
+  </form>
+
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <p id="link"></p>
+</div>
+
+<button id="infoBtn">?</button>
+
+<div id="infoBox">
+  Upload files and generate temporary secure links.<br>
+  Files auto-expire after time limit.
 </div>
 
 <script>
-async function uploadFile() {
-    const fileInput = document.getElementById("file");
-    const file = fileInput.files[0];
+const form = document.getElementById("uploadForm");
+const fileInput = document.getElementById("fileInput");
+const fileName = document.getElementById("fileName");
+const progressBar = document.getElementById("progressBar");
+const progressContainer = document.getElementById("progressContainer");
+const linkBox = document.getElementById("link");
 
-    if (!file) return alert("Select a file");
+fileInput.onchange = () => {
+  fileName.innerText = fileInput.files[0]?.name || "No file chosen";
+};
 
-    const formData = new FormData();
-    formData.append("file", file);
+form.onsubmit = (e) => {
+  e.preventDefault();
 
-    const res = await fetch("http://localhost:5000/upload", {
-        method: "POST",
-        body: formData
-    });
+  const data = new FormData(form);
+  const xhr = new XMLHttpRequest();
 
-    const data = await res.json();
+  progressContainer.style.display = "block";
+  progressBar.style.width = "0%";
 
-    const link = document.getElementById("link");
-    link.href = data.shareLink;
-    link.innerText = "Share Link: " + data.shareLink;
-}
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+      progressBar.style.width = (e.loaded / e.total) * 100 + "%";
+    }
+  };
+
+  xhr.onload = () => {
+    const res = JSON.parse(xhr.responseText);
+
+    linkBox.innerHTML = `
+      <p>🎉 Uploaded Successfully</p>
+      <a href="${res.link}" target="_blank">Open File Link</a>
+      <br><br>
+      <button id="copyBtn">Copy Link</button>
+    `;
+
+    document.getElementById("copyBtn").onclick = async () => {
+      await navigator.clipboard.writeText(res.link);
+      alert("Link copied!");
+    };
+
+    fileInput.value = "";
+    fileName.innerText = "No file chosen";
+    progressContainer.style.display = "none";
+  };
+
+  xhr.open("POST", "/upload");
+  xhr.send(data);
+};
+
+/* INFO */
+document.getElementById("infoBtn").onclick = () => {
+  const box = document.getElementById("infoBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+};
 </script>
 
 </body>
