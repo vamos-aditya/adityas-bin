@@ -5,7 +5,7 @@ const path = require("path");
 const cors = require("cors");
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -16,7 +16,10 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
 }
 
-// Multer config
+// ---------------- STATIC FRONTEND (IMPORTANT FIX) ----------------
+app.use(express.static(path.join(__dirname, "public")));
+
+// ---------------- MULTER CONFIG ----------------
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, "uploads/");
@@ -29,9 +32,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ---------------- SIMPLE DB (memory) ----------------
+// ---------------- SIMPLE DB ----------------
 const filesDB = {}; 
 // id -> { filename, originalName }
+
+// ---------------- HOME ROUTE (FIX "Cannot GET /") ----------------
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // ---------------- UPLOAD ----------------
 app.post("/upload", upload.single("file"), (req, res) => {
@@ -44,17 +52,17 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
     res.json({
         success: true,
-        id: id,
-        shareLink: `http://localhost:${PORT}/file/${id}`
+        id,
+        shareLink: `${req.protocol}://${req.get("host")}/file/${id}`
     });
 });
 
-// ---------------- SHARE PAGE (IMPORTANT) ----------------
+// ---------------- SHARE PAGE ----------------
 app.get("/file/:id", (req, res) => {
     const file = filesDB[req.params.id];
 
     if (!file) {
-        return res.send("File not found");
+        return res.send("<h2>File not found</h2>");
     }
 
     res.send(`
@@ -70,12 +78,14 @@ app.get("/file/:id", (req, res) => {
                     height: 100vh;
                     background: #111;
                     color: white;
+                    margin: 0;
                 }
                 .box {
                     text-align: center;
-                    padding: 20px;
+                    padding: 25px;
                     border: 1px solid #333;
-                    border-radius: 10px;
+                    border-radius: 12px;
+                    background: #1c1c1c;
                 }
                 a {
                     display: inline-block;
@@ -84,7 +94,7 @@ app.get("/file/:id", (req, res) => {
                     background: #00c853;
                     color: white;
                     text-decoration: none;
-                    border-radius: 5px;
+                    border-radius: 6px;
                 }
             </style>
         </head>
@@ -112,7 +122,7 @@ app.get("/download/:id", (req, res) => {
     res.download(filePath, file.originalName);
 });
 
-// ---------------- START ----------------
+// ---------------- START SERVER ----------------
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
