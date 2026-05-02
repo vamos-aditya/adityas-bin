@@ -16,30 +16,36 @@ body {
   align-items: center;
   overflow: hidden;
   position: relative;
-  color: white;
 }
 
-/* VIDEO BACKGROUND */
+/* 🎬 VIDEO BACKGROUND */
 #bgVideo {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   z-index: -2;
+  pointer-events: none;
 }
 
-/* DARK OVERLAY */
+/* 🌑 DARK OVERLAY */
 body::before {
   content: "";
   position: fixed;
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.55);
+  top: 0;
+  left: 0;
   z-index: -1;
 }
 
-/* MAIN BOX */
+/* 📦 MAIN CONTAINER */
 .container {
+  position: relative;
+  z-index: 2;
   background: rgba(20,20,30,0.78);
   backdrop-filter: blur(14px);
   padding: 35px;
@@ -47,9 +53,10 @@ body::before {
   width: 400px;
   text-align: center;
   box-shadow: 0 10px 45px rgba(0,0,0,0.65);
+  color: white;
 }
 
-/* FILE INPUT */
+/* FILE PICKER */
 .file-label {
   display: inline-block;
   padding: 12px 22px;
@@ -57,6 +64,7 @@ body::before {
   color: black;
   border-radius: 8px;
   cursor: pointer;
+  margin-bottom: 10px;
   font-weight: bold;
 }
 
@@ -65,11 +73,12 @@ body::before {
 }
 
 #fileName {
-  margin: 10px 0;
+  font-size: 15px;
   color: #ccc;
+  margin-bottom: 15px;
 }
 
-/* BUTTON */
+/* UPLOAD BUTTON */
 button.upload {
   background: #4CAF50;
   border: none;
@@ -78,9 +87,10 @@ button.upload {
   border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
+  font-family: 'Alegreya', serif;
 }
 
-/* PROGRESS */
+/* PROGRESS BAR */
 .progress-container {
   width: 100%;
   background: #333;
@@ -96,16 +106,33 @@ button.upload {
   border-radius: 10px;
 }
 
-/* LINK AREA */
-#link {
-  margin-top: 15px;
-  word-break: break-all;
+/* UPLOAD STATUS */
+.uploaded-msg {
+  color: #ff1744;
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 0 0 10px #ff1744;
 }
 
-#link a {
-  color: #38bdf8;
+/* DOWNLOAD BUTTON */
+#downloadBtn {
+  background: #00ffcc;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Alegreya', serif;
   font-weight: bold;
-  text-decoration: none;
+  box-shadow: 0 0 15px #00ffcc;
+  margin-top: 10px;
+}
+
+/* COPY PROMPT */
+#copyPrompt {
+  color: #38bdf8;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 /* INFO BUTTON */
@@ -121,6 +148,8 @@ button.upload {
   color: white;
   font-size: 28px;
   cursor: pointer;
+  box-shadow: 0 0 20px #38bdf8;
+  z-index: 1000;
 }
 
 /* INFO BOX */
@@ -131,15 +160,40 @@ button.upload {
   right: 20px;
   width: 300px;
   background: rgba(20,20,30,0.95);
+  color: white;
   padding: 20px;
   border-radius: 15px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+  z-index: 1000;
   font-size: 14px;
+  line-height: 1.6;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  #bgVideo {
+    display: none;
+  }
+
+  body {
+    background: url("./bg.jpg") no-repeat center/cover;
+  }
+
+  .container {
+    width: 90%;
+  }
+
+  #infoBox {
+    width: 80%;
+    right: 10%;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<!-- 🎬 CHANGE THIS FILE NAME TO YOUR NEW VIDEO -->
 <video autoplay muted loop playsinline id="bgVideo">
   <source src="newbg.mp4" type="video/mp4">
 </video>
@@ -165,14 +219,23 @@ button.upload {
   <p id="link"></p>
 </div>
 
+<!-- INFO BUTTON -->
 <button id="infoBtn">?</button>
 
+<!-- INFO BOX -->
 <div id="infoBox">
-  Upload files and generate temporary secure links.<br>
-  Files auto-expire after time limit.
+  <strong>How TempShare Works:</strong><br><br>
+  Upload your file securely and generate a private temporary link.<br><br>
+  Share that link with anyone.<br><br>
+  The file can only be opened once, after which it is permanently deleted from the server.<br><br>
+  This ensures secure, temporary, one-time file sharing.
 </div>
 
 <script>
+const video = document.getElementById("bgVideo");
+video.play().catch(() => {});
+
+/* FILE UPLOAD */
 const form = document.getElementById("uploadForm");
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
@@ -181,7 +244,9 @@ const progressContainer = document.getElementById("progressContainer");
 const linkBox = document.getElementById("link");
 
 fileInput.onchange = () => {
-  fileName.innerText = fileInput.files[0]?.name || "No file chosen";
+  fileName.innerText = fileInput.files[0]
+    ? fileInput.files[0].name
+    : "No file chosen";
 };
 
 form.onsubmit = (e) => {
@@ -203,30 +268,35 @@ form.onsubmit = (e) => {
     const res = JSON.parse(xhr.responseText);
 
     linkBox.innerHTML = `
-      <p>🎉 Uploaded Successfully</p>
-      <a href="${res.link}" target="_blank">Open File Link</a>
-      <br><br>
-      <button id="copyBtn">Copy Link</button>
+      <p class="uploaded-msg">🎉 Uploaded!</p>
+      <button id="downloadBtn">⬇ Download</button>
+      <p id="copyPrompt"></p>
     `;
 
-    document.getElementById("copyBtn").onclick = async () => {
+    document.getElementById("downloadBtn").onclick = async () => {
       await navigator.clipboard.writeText(res.link);
-      alert("Link copied!");
-    };
 
-    fileInput.value = "";
-    fileName.innerText = "No file chosen";
-    progressContainer.style.display = "none";
+      document.getElementById("copyPrompt").innerText =
+        "✅ Link copied to clipboard";
+
+      fileInput.value = "";
+      fileName.innerText = "No file chosen";
+      progressContainer.style.display = "none";
+      progressBar.style.width = "0%";
+    };
   };
 
   xhr.open("POST", "/upload");
   xhr.send(data);
 };
 
-/* INFO */
-document.getElementById("infoBtn").onclick = () => {
-  const box = document.getElementById("infoBox");
-  box.style.display = box.style.display === "block" ? "none" : "block";
+/* INFO TOGGLE */
+const infoBtn = document.getElementById("infoBtn");
+const infoBox = document.getElementById("infoBox");
+
+infoBtn.onclick = () => {
+  infoBox.style.display =
+    infoBox.style.display === "block" ? "none" : "block";
 };
 </script>
 
