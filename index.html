@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aditya's Bin</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
@@ -18,7 +18,6 @@ body {
   overflow: hidden;
 }
 
-/* 🎬 VIDEO BACKGROUND */
 #bgVideo {
   position: fixed;
   top: 0;
@@ -30,7 +29,6 @@ body {
   pointer-events: none;
 }
 
-/* 🌑 OVERLAY */
 body::before {
   content: "";
   position: fixed;
@@ -42,21 +40,19 @@ body::before {
   z-index: -1;
 }
 
-/* 📦 MAIN BOX */
 .container {
   position: relative;
   z-index: 1;
-  background: rgba(20,20,30,0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(20,20,30,0.75);
+  backdrop-filter: blur(14px);
   padding: 35px;
   border-radius: 20px;
-  width: 380px;
+  width: 420px;
   text-align: center;
   box-shadow: 0 10px 40px rgba(0,0,0,0.6);
   color: white;
 }
 
-/* 🎵 MUSIC BUTTON */
 #musicBtn {
   position: fixed;
   top: 15px;
@@ -72,7 +68,6 @@ body::before {
   font-family: 'Alegreya', serif;
 }
 
-/* ▶ YOUTUBE BUTTON */
 #ytBtn {
   position: fixed;
   top: 15px;
@@ -86,20 +81,74 @@ body::before {
   cursor: pointer;
   font-family: 'Alegreya', serif;
   box-shadow: 0 0 15px #ff0000;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
-/* file input */
+#infoBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 20px #38bdf8;
+  z-index: 999;
+}
+
+.info-box {
+  position: fixed;
+  bottom: 85px;
+  right: 20px;
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: rgba(20,20,30,0.96);
+  backdrop-filter: blur(12px);
+  color: white;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  display: none;
+  z-index: 999;
+  text-align: left;
+}
+
+.info-box h3 {
+  margin-top: 0;
+  color: #38bdf8;
+}
+
+.info-box p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #ddd;
+}
+
+#closeInfo {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #38bdf8;
+  color: white;
+  cursor: pointer;
+  font-family: 'Alegreya', serif;
+}
+
 .file-label {
   display: inline-block;
   padding: 10px 20px;
-  background: #ffffff;
-  color: #000;
+  background: white;
+  color: black;
   border-radius: 8px;
   cursor: pointer;
   margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .file-label input {
@@ -112,7 +161,6 @@ body::before {
   margin-bottom: 15px;
 }
 
-/* upload button */
 button.upload {
   background: #4CAF50;
   border: none;
@@ -121,9 +169,10 @@ button.upload {
   color: white;
   border-radius: 10px;
   cursor: pointer;
+  font-family: 'Alegreya', serif;
+  font-size: 16px;
 }
 
-/* progress */
 .progress-container {
   width: 100%;
   background: #333;
@@ -137,18 +186,16 @@ button.upload {
   width: 0%;
   background: #00ffcc;
   border-radius: 10px;
+  transition: width 0.2s;
 }
 
-/* uploaded */
 .uploaded-msg {
   color: #ff1744;
   font-size: 18px;
   font-weight: bold;
-  text-shadow: 0 0 10px #ff1744;
 }
 
-/* download button */
-#downloadBtn {
+.action-btn {
   background: #00ffcc;
   border: none;
   padding: 10px 18px;
@@ -156,18 +203,31 @@ button.upload {
   cursor: pointer;
   font-family: 'Alegreya', serif;
   font-weight: bold;
-  box-shadow: 0 0 15px #00ffcc;
+  margin-top: 12px;
+}
+
+.copy-success {
+  color: #38bdf8;
+  font-weight: bold;
   margin-top: 10px;
 }
 
-/* 📱 MOBILE */
 @media (max-width: 768px) {
   #bgVideo {
     display: none;
   }
 
   body {
-    background: url("./bg.jpg") no-repeat center/cover;
+    background: url('./bg.jpg') no-repeat center/cover;
+  }
+
+  .container {
+    width: 90%;
+  }
+
+  .info-box {
+    width: 85%;
+    right: 7%;
   }
 }
 </style>
@@ -175,25 +235,40 @@ button.upload {
 
 <body>
 
-<!-- 🎬 VIDEO (FIXED FOR ANDROID) -->
 <video autoplay muted loop playsinline id="bgVideo">
   <source src="bg.mp4" type="video/mp4">
 </video>
 
-<!-- 🎵 MUSIC -->
 <audio id="bgMusic" loop>
   <source src="music.mp3" type="audio/mp3">
 </audio>
 
-<!-- BUTTONS -->
 <button id="musicBtn">🎵 Resume Music</button>
+<button id="ytBtn">YouTube</button>
+<button id="infoBtn">?</button>
 
-<button id="ytBtn">
-  <svg height="18" width="18" viewBox="0 0 24 24" fill="white">
-    <path d="M10 15l5.19-3L10 9v6zm11-3c0 5-1 6-8 6s-8-1-8-6 1-6 8-6 8 1 8 6z"/>
-  </svg>
-  YouTube
-</button>
+<div id="infoBox" class="info-box">
+  <h3>How This File Sharing Service Works</h3>
+  <p>
+    This platform allows you to securely upload files and generate a temporary private sharing link for fast and private sharing.<br><br>
+
+    <strong>Step-by-step process:</strong><br><br>
+
+    • Select the file you want to share<br>
+    • Upload it securely to the server<br>
+    • Once uploaded, a unique private link is generated exclusively for your file<br>
+    • Press the download button to instantly copy your personal sharing link<br>
+    • Share this link with anyone you choose<br><br>
+
+    <strong>Important Security Features:</strong><br><br>
+
+    • Each uploaded file is intended for one-time sharing<br>
+    • Once the recipient accesses the file through the generated link, the file is automatically deleted from the server<br>
+    • Files may also expire automatically after a limited time if unused<br>
+    • This ensures enhanced privacy, temporary access, and reduced long-term storage of personal data
+  </p>
+  <button id="closeInfo">Close</button>
+</div>
 
 <div class="container">
   <h2>🗂️ Aditya's Bin</h2>
@@ -201,7 +276,7 @@ button.upload {
   <form id="uploadForm">
     <label class="file-label">
       Choose File
-      <input type="file" name="file" id="fileInput" required />
+      <input type="file" name="file" id="fileInput" required>
     </label>
 
     <p id="fileName">No file chosen</p>
@@ -213,22 +288,17 @@ button.upload {
     <div class="progress-bar" id="progressBar"></div>
   </div>
 
-  <p id="link"></p>
+  <div id="link"></div>
 </div>
 
 <script>
-/* FIX VIDEO AUTOPLAY ON ANDROID */
 const video = document.getElementById("bgVideo");
-video.play().catch(() => {
-  console.log("Autoplay blocked");
-});
+video.play().catch(() => {});
 
-/* YOUTUBE */
 document.getElementById("ytBtn").onclick = () => {
   window.open("https://www.youtube.com/watch?v=teERz_qPtzY", "_blank");
 };
 
-/* MUSIC */
 const music = document.getElementById("bgMusic");
 const musicBtn = document.getElementById("musicBtn");
 
@@ -250,12 +320,22 @@ musicBtn.onclick = () => {
   }
 };
 
-/* UPLOAD */
+document.getElementById("infoBtn").onclick = () => {
+  document.getElementById("infoBox").style.display = "block";
+};
+
+document.getElementById("closeInfo").onclick = () => {
+  document.getElementById("infoBox").style.display = "none";
+};
+
 const form = document.getElementById("uploadForm");
 const fileInput = document.getElementById("fileInput");
 const fileName = document.getElementById("fileName");
 const progressBar = document.getElementById("progressBar");
 const progressContainer = document.getElementById("progressContainer");
+const linkDiv = document.getElementById("link");
+
+let uploadedLink = "";
 
 fileInput.onchange = () => {
   fileName.innerText = fileInput.files[0]
@@ -270,24 +350,44 @@ form.onsubmit = (e) => {
   const xhr = new XMLHttpRequest();
 
   progressContainer.style.display = "block";
+  progressBar.style.width = "0%";
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) {
-      progressBar.style.width = (e.loaded / e.total) * 100 + "%";
+      progressBar.style.width = ((e.loaded / e.total) * 100) + "%";
     }
   };
 
   xhr.onload = () => {
-    const res = JSON.parse(xhr.responseText);
+    if (xhr.status === 200) {
+      const res = JSON.parse(xhr.responseText);
+      uploadedLink = res.link;
 
-    document.getElementById("link").innerHTML = `
-      <p class="uploaded-msg">🎉 Uploaded!</p>
-      <button id="downloadBtn">⬇ Download File</button>
-    `;
+      linkDiv.innerHTML = `
+        <p class="uploaded-msg">🎉 Uploaded Successfully!</p>
+        <button class="action-btn" id="downloadBtn">⬇ Download File</button>
+        <p class="copy-success" id="copyMsg" style="display:none;">🔗 Link copied to clipboard!</p>
+      `;
 
-    document.getElementById("downloadBtn").onclick = () => {
-      window.open(res.link, "_blank");
-    };
+      document.getElementById("downloadBtn").onclick = () => {
+        navigator.clipboard.writeText(uploadedLink).then(() => {
+          const msg = document.getElementById("copyMsg");
+          msg.style.display = "block";
+
+          fileInput.value = "";
+          fileName.innerText = "No file chosen";
+          progressBar.style.width = "0%";
+          progressContainer.style.display = "none";
+
+          setTimeout(() => {
+            msg.style.display = "none";
+          }, 2500);
+        });
+      };
+
+    } else {
+      linkDiv.innerHTML = `<p style="color:red;">Upload failed. Try again.</p>`;
+    }
   };
 
   xhr.open("POST", "/upload");
